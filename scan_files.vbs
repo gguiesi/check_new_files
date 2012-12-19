@@ -15,11 +15,11 @@ If Not isRunning(semaphore_file) Then
     createSemaphore(semaphore_file)
     If Not almostRunOnce(first_run_file) Then
         firstRun first_run_file
-        firstMove origin_path, destiny_path, load_time_from_file(newest_path)
         Wscript.Echo "first time execution"
+        firstMove origin_path, destiny_path, load_time_from_file(newest_path)
     Else 
-        otherMoves origin_path, destiny_path, load_time_from_file(newest_path)
         Wscript.Echo "other times executions"
+        otherMoves origin_path, destiny_path, load_time_from_file(newest_path)
     End If
     deleteSemaphore(semaphore_file)
 Else 
@@ -87,51 +87,54 @@ Function load_time_from_file(filename)
 End Function
 
 Function otherMoves(origin_path, destiny_path, newest) 
-    Dim folder, file, fileCollection, folderCollection, subFolder, fso, strTempSource
+    Dim folder, file, fileCollection, folderCollection, subFolder, fso, strTempSource, intCompare
     Set fso = CreateObject("Scripting.FileSystemObject")
     Set folder = fso.GetFolder(origin_path)
     Set strTempSource = fso.GetFolder(folder)
     Set fileCollection = folder.Files
     For Each file In fileCollection
-        If file.DateLastModified > load_time_from_file(newest_path) Then
-            Wscript.Echo "data de modificação mais recente: " & file.DateLastModified
-            Wscript.Echo "arquivo movido"
-            newest = file.DateLastModified
-            fso.CopyFile file.Path, destiny_path, True
+        intCompare = StrComp("Producao", folder.name, vbTextCompare)
+        If intCompare = 0 Then
+            If file.DateLastModified > load_time_from_file(newest_path) Then
+                Wscript.Echo "data de modificação mais recente: " & file.DateLastModified
+                Wscript.Echo "arquivo movido"
+                newest = file.DateLastModified
+                fso.CopyFile file.Path, destiny_path, True
+                save_datetime_in_file newest_path, newest
+            End If
         End If
     Next
     Set folderCollection = strTempSource.SubFolders
     For Each subFolder In folderCollection
         otherMoves subFolder.Path, destiny_path, newest
     Next
-    save_datetime_in_file newest_path, newest
 End Function
 
 'primeira execução para saber qual arquivo é o mais antigo'
 Function firstMove(origin_path, destiny_path, newest)
-    'Wscript.Echo "first newest: " & newest'
-    Dim folder, file, fileCollection, folderCollection, subFolder, fso, strTempSource
+    Dim folder, file, fileCollection, folderCollection, subFolder, fso, strTempSource, intCompare
     Set fso = CreateObject("Scripting.FileSystemObject")
     Set folder = fso.GetFolder(origin_path)
     Set strTempSource = fso.GetFolder(folder)
     Set fileCollection = folder.Files
     For Each file In fileCollection
-        If file.DateLastModified > newest Then
-            Wscript.Echo "------------------------------------------------------------------------------------------------------------------------"
-            Wscript.Echo "data arquivo: " & file.DateLastModified 
-            Wscript.Echo "data base:    " & newest
-            newest = file.DateLastModified
-            Wscript.Echo "novo newest: " & newest & " from file: " & file.Path
-            Wscript.Echo "------------------------------------------------------------------------------------------------------------------------"
+        intCompare = StrComp("Producao", folder.name, vbTextCompare)
+        If intCompare = 0 Then
+            If file.DateLastModified > newest Then
+                Wscript.Echo "------------------------------------------------------------------------------------------------------------------------"
+                Wscript.Echo "data arquivo: " & file.DateLastModified 
+                Wscript.Echo "data base:    " & newest
+                newest = file.DateLastModified
+                Wscript.Echo "novo newest: " & newest & " from file: " & file.Path
+                Wscript.Echo "------------------------------------------------------------------------------------------------------------------------"
+                'salva a data do mais novo no arquivo de ref'
+                save_datetime_in_file newest_path, FormatDateTime(newest)
+            End If
+            fso.CopyFile file.Path, destiny_path, True
         End If
-        fso.CopyFile file.Path, destiny_path, True
     Next
     Set folderCollection = strTempSource.SubFolders
     For Each subFolder In folderCollection
-        'Wscript.Echo "entrou na recursão - firstMove("& subFolder.Path & "," & destiny_path & "," & newest & ")"'
         firstMove subFolder.Path, destiny_path, newest
     Next
-    'salva a data do mais novo no arquivo de ref'
-    'Wscript.Echo "data mais recente: " & newest'
-    save_datetime_in_file newest_path, FormatDateTime(newest)
 End Function
