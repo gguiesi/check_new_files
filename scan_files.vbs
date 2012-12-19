@@ -3,7 +3,7 @@ Const fsoForReading = 1
 Const fsoForWriting = 2
 Const origin_path= "C:\Documents and Settings\Administrador\Desktop\xml_path\"    'caminho da pasta onde estão os xmls'
 Const destiny_path= "C:\Documents and Settings\Administrador\Desktop\to_transfer\"     'caminho da pasta onde devem ser enviados os arquivos'
-Const newest_path = "newest_file.txt"
+Const newest_path = "newest_date.txt"
 Const semaphore_file = "running.txt"
 Const first_run_file = "first_run.txt"
 On Error Resume Next
