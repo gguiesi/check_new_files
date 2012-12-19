@@ -1,8 +1,8 @@
 Option Explicit
 Const fsoForReading = 1
 Const fsoForWriting = 2
-Const xml_path = "C:\Documents and Settings\Administrador\Desktop\xml_path\"    'caminho da pasta onde estão os xmls'
-Const ftp_path = "C:\Documents and Settings\Administrador\Desktop\to_transfer\"     'caminho da pasta onde devem ser enviados os arquivos'
+Const origin_path= "C:\Documents and Settings\Administrador\Desktop\xml_path\"    'caminho da pasta onde estão os xmls'
+Const destiny_path= "C:\Documents and Settings\Administrador\Desktop\to_transfer\"     'caminho da pasta onde devem ser enviados os arquivos'
 Const newest_path = "newest_file.txt"
 Const semaphore_file = "running.txt"
 Const first_run_file = "first_run.txt"
@@ -15,10 +15,10 @@ If Not isRunning(semaphore_file) Then
     createSemaphore(semaphore_file)
     If Not almostRunOnce(first_run_file) Then
         firstRun first_run_file
-        firstMove xml_path, ftp_path, load_time_from_file(newest_path)
+        firstMove origin_path, destiny_path, load_time_from_file(newest_path)
         Wscript.Echo "first time execution"
     Else 
-        otherMoves xml_path, ftp_path, load_time_from_file(newest_path)
+        otherMoves origin_path, destiny_path, load_time_from_file(newest_path)
         Wscript.Echo "other times executions"
     End If
     deleteSemaphore(semaphore_file)
@@ -86,10 +86,10 @@ Function load_time_from_file(filename)
     load_time_from_file = CDate(f.ReadAll)
 End Function
 
-Function otherMoves(xml_path, ftp_path, newest) 
+Function otherMoves(origin_path, destiny_path, newest) 
     Dim folder, file, fileCollection, folderCollection, subFolder, fso, strTempSource
     Set fso = CreateObject("Scripting.FileSystemObject")
-    Set folder = fso.GetFolder(xml_path)
+    Set folder = fso.GetFolder(origin_path)
     Set strTempSource = fso.GetFolder(folder)
     Set fileCollection = folder.Files
     For Each file In fileCollection
@@ -97,22 +97,22 @@ Function otherMoves(xml_path, ftp_path, newest)
             Wscript.Echo "data de modificação mais recente: " & file.DateLastModified
             Wscript.Echo "arquivo movido"
             newest = file.DateLastModified
-            fso.CopyFile file.Path, ftp_path, True
+            fso.CopyFile file.Path, destiny_path, True
         End If
     Next
     Set folderCollection = strTempSource.SubFolders
     For Each subFolder In folderCollection
-        otherMoves subFolder.Path, ftp_path, newest
+        otherMoves subFolder.Path, destiny_path, newest
     Next
     save_datetime_in_file newest_path, newest
 End Function
 
 'primeira execução para saber qual arquivo é o mais antigo'
-Function firstMove(xml_path, ftp_path, newest)
+Function firstMove(origin_path, destiny_path, newest)
     'Wscript.Echo "first newest: " & newest'
     Dim folder, file, fileCollection, folderCollection, subFolder, fso, strTempSource
     Set fso = CreateObject("Scripting.FileSystemObject")
-    Set folder = fso.GetFolder(xml_path)
+    Set folder = fso.GetFolder(origin_path)
     Set strTempSource = fso.GetFolder(folder)
     Set fileCollection = folder.Files
     For Each file In fileCollection
@@ -124,12 +124,12 @@ Function firstMove(xml_path, ftp_path, newest)
             Wscript.Echo "novo newest: " & newest & " from file: " & file.Path
             Wscript.Echo "------------------------------------------------------------------------------------------------------------------------"
         End If
-        fso.CopyFile file.Path, ftp_path, True
+        fso.CopyFile file.Path, destiny_path, True
     Next
     Set folderCollection = strTempSource.SubFolders
     For Each subFolder In folderCollection
-        'Wscript.Echo "entrou na recursão - firstMove("& subFolder.Path & "," & ftp_path & "," & newest & ")"'
-        firstMove subFolder.Path, ftp_path, newest
+        'Wscript.Echo "entrou na recursão - firstMove("& subFolder.Path & "," & destiny_path & "," & newest & ")"'
+        firstMove subFolder.Path, destiny_path, newest
     Next
     'salva a data do mais novo no arquivo de ref'
     'Wscript.Echo "data mais recente: " & newest'
