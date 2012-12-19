@@ -93,8 +93,8 @@ Function otherMoves(origin_path, destiny_path, newest)
     Set strTempSource = fso.GetFolder(folder)
     Set fileCollection = folder.Files
     For Each file In fileCollection
-        intCompare = StrComp("Producao", folder.name, vbTextCompare)
-        If intCompare = 0 Then
+        'intCompare = StrComp("Producao", folder.name, vbTextCompare)'
+        'If intCompare = 0 Then'
             If file.DateLastModified > load_time_from_file(newest_path) Then
                 Wscript.Echo "data de modificação mais recente: " & file.DateLastModified
                 Wscript.Echo "arquivo movido"
@@ -102,7 +102,7 @@ Function otherMoves(origin_path, destiny_path, newest)
                 fso.CopyFile file.Path, destiny_path, True
                 save_datetime_in_file newest_path, newest
             End If
-        End If
+        'End If
     Next
     Set folderCollection = strTempSource.SubFolders
     For Each subFolder In folderCollection
@@ -118,8 +118,8 @@ Function firstMove(origin_path, destiny_path, newest)
     Set strTempSource = fso.GetFolder(folder)
     Set fileCollection = folder.Files
     For Each file In fileCollection
-        intCompare = StrComp("Producao", folder.name, vbTextCompare)
-        If intCompare = 0 Then
+        'intCompare = StrComp("Producao", folder.name, vbTextCompare)'
+        'If intCompare = 0 Then'
             If file.DateLastModified > newest Then
                 Wscript.Echo "------------------------------------------------------------------------------------------------------------------------"
                 Wscript.Echo "data arquivo: " & file.DateLastModified 
@@ -131,7 +131,7 @@ Function firstMove(origin_path, destiny_path, newest)
                 save_datetime_in_file newest_path, FormatDateTime(newest)
             End If
             fso.CopyFile file.Path, destiny_path, True
-        End If
+        'End If'
     Next
     Set folderCollection = strTempSource.SubFolders
     For Each subFolder In folderCollection
